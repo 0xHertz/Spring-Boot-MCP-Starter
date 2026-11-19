@@ -84,6 +84,11 @@ Agent
 | tools/list | 获取可用工具列表 | 支持 |
 | tools/call | 执行指定工具 | 支持 |
 
+## TODO
+
+* Resources
+* Prompts
+
 ## Build and install
 
 ```bash
