@@ -87,6 +87,9 @@ Agent
 ## TODO
 
 * Resources
+
+  只读上下文资源
+
 * Prompts
 
 ## Build and install
