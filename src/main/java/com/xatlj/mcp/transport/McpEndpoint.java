@@ -7,6 +7,7 @@ import org.slf4j.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @RestController
@@ -24,7 +25,7 @@ public class McpEndpoint {
     }
 
     @RequestMapping(value="${mcp.server.path:/mcp}",method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> post(@RequestBody JsonNode body,HttpServletRequest request,
+    public ResponseEntity<?> post(@RequestBody JsonNode body, HttpServletRequest request, HttpServletResponse response,
                                   @RequestHeader(value="Accept",required=false) String accept) {
         if(!originAllowed(request)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         if(body==null||!body.isObject()) return protocolError(null,-32600,"Invalid JSON-RPC request",HttpStatus.BAD_REQUEST);
@@ -60,18 +61,18 @@ public class McpEndpoint {
             Map<String,Object> result;
             if("server/discover".equals(method)) result=discover();
             else if("tools/list".equals(method)) result=toolsList();
-            else if("tools/call".equals(method)) result=toolsCall(params);
+            else if("tools/call".equals(method)) result=toolsCall(params, request, response);
             else return protocolError(id,-32601,"Method not found",HttpStatus.NOT_FOUND);
 
-            Map<String,Object> response=success(id,result);
+            Map<String,Object> mresponse=success(id,result);
             if(props.isSseEnabled()&&accept!=null&&accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)){
-                String data=mapper.writeValueAsString(response);
+                String data=mapper.writeValueAsString(mresponse);
                 return ResponseEntity.ok()
                         .contentType(MediaType.TEXT_EVENT_STREAM)
                         .header("X-Accel-Buffering","no")
                         .body("event: message\ndata: "+data+"\n\n");
             }
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(mresponse);
         } catch(McpValidationException e) {
             return protocolError(id,-32602,e.getMessage(),HttpStatus.BAD_REQUEST);
         } catch(Exception e) {
@@ -163,7 +164,7 @@ public class McpEndpoint {
 
 
     @SuppressWarnings("unchecked")
-    private Map<String,Object> toolsCall(JsonNode p)throws Exception{
+    private Map<String,Object> toolsCall(JsonNode p, HttpServletRequest request,HttpServletResponse response)throws Exception{
         String name=p.path("name").asText("");
         if(name.isEmpty())throw new McpValidationException("Missing tool name");
         McpToolDefinition tool=registry.get(name);
@@ -174,7 +175,7 @@ public class McpEndpoint {
         String status="SUCCESS";
         String errorCode=null;
         try{
-            Object output=executor.execute(tool,args);
+            Object output=executor.execute(tool,args,request,response);
             return toolResult(mapper.writeValueAsString(output),false);
         }catch(Exception e){
             status=isAccessDenied(e)?"DENIED":"FAILED";

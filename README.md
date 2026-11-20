@@ -2,7 +2,12 @@
 
 JDK 8 / Spring Boot 2.7.x starter. It exposes annotated Spring MVC controller methods as MCP tools.
 
-## Regist
+
+
+## Peinciple
+
+### Regist
+
 ```
 Spring Boot 启动
       |
@@ -32,7 +37,7 @@ Spring Boot 启动
       v
 注册到 McpToolRegistry
 ```
-## Call
+### Call
 ```
 Agent
   |
@@ -100,7 +105,11 @@ mvn clean install # 生成 JAR 并安装到本机 Maven 仓库	本机其他项�
 mvn deploy        # 发布到 Maven 私服	多个项目、团队共同使用
 ```
 
-## Add dependency
+
+
+## Usage
+
+### Add dependency
 
 ```xml
 <dependency>
@@ -110,7 +119,7 @@ mvn deploy        # 发布到 Maven 私服	多个项目、团队共同使用
 </dependency>
 ```
 
-## Configuration
+### Configuration
 
 ```yaml
 mcp:
@@ -133,7 +142,7 @@ mcp:
     expose-error-details: false # 是否向 Agent 暴露异常详情
 ```
 
-## Example
+### Example
 
 ```java
 @RestController
@@ -156,21 +165,21 @@ All method parameters require `@McpParam`. Use explicit parameter names. Servlet
 
 ## Test
 
-### 基础功能
+### Base function
 [ ] Starter 自动配置加载成功
 [ ] 多包扫描成功
 [ ] 工具名称白名单生效
 [ ] 工具描述和参数 Schema 正确生成
 [ ] 工具调用成功
 
-### 参数与异常
+### parameter & Exception
 [ ] 必填参数校验
 [ ] 参数类型转换
 [ ] 未知参数拒绝
 [ ] 工具不存在处理
 [ ] 业务异常脱敏
 
-### 安全与兼容
+### Security
 [ ] JWT 认证有效
 [ ] Spring AOP 正常执行
 [ ] 方法级权限正常执行

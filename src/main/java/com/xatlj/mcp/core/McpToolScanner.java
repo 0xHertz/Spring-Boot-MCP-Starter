@@ -45,9 +45,18 @@ public class McpToolScanner implements ApplicationRunner {
                 List<McpToolDefinition.ParameterDefinition> params=new ArrayList<McpToolDefinition.ParameterDefinition>();
                 Parameter[] javaParams=targetMethod.getParameters();
                 for(Parameter p:javaParams) {
+                    // 1. 支持的 Servlet 基础设施参数，不参与 MCP 参数定义
+                    if (isWebInfrastructureType(p.getType())) {
+                        if (p.isAnnotationPresent(McpParam.class)) {
+                            throw new IllegalStateException(
+                                    "Servlet infrastructure parameter must not use @McpParam: "
+                                            + targetMethod);
+                        }
+                        continue;
+                    }
+                    // 2. 普通业务参数必须有 @McpParam
                     McpParam mp=p.getAnnotation(McpParam.class);
                     if(mp==null)throw new IllegalStateException("Every MCP method parameter requires @McpParam: "+targetMethod);
-                    if(isWebInfrastructureType(p.getType()))throw new IllegalStateException("Unsupported servlet parameter in MCP tool: "+p.getType().getName());
                     String desc=swagger.parameterDescription(p,mp.description());
                     params.add(new McpToolDefinition.ParameterDefinition(mp.name(),desc,mp.required(),p.getParameterizedType(),p.getType()));
                 }
