@@ -74,7 +74,7 @@ public class McpToolExecutor {
             Object raw=args.get(p.getName());
             if(raw==null&&p.isRequired())throw new McpValidationException("Missing required argument: "+p.getName());
             JavaType jt=TypeFactory.defaultInstance().constructType(p.getGenericType());
-            values[businessIndex]=raw==null?null:mapper.convertValue(raw,jt);
+            values[methodIndex]=raw==null?null:mapper.convertValue(raw,jt);
             businessIndex++;
         }
         // 检查参数定义数量是否匹配
